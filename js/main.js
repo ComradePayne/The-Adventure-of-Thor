@@ -13,7 +13,7 @@ window.onload = function() {
     
     "use strict";
     
-    var game = new Phaser.Game( 800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update } );
+    var game = new Phaser.Game( 800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update, render: render } );
     
     function preload() {
         // Load an image and call it 'logo'.
@@ -24,7 +24,6 @@ window.onload = function() {
     
     var player; //Thor
         var playerFacing = 'right'; // Which way is Thor facing (Left or right)
-        player.health = 5;
     
         
     var HeavyEnemy;//The dude you need to fight.
@@ -58,11 +57,16 @@ window.onload = function() {
 
         
         //Player Setup
-        player = game.add.sprite(game.world.centerX - 250, game.world.centerY + 50, "Thor");
+        player = game.add.sprite(game.world.centerX - 250, game.world.centerY + 100, "Thor");
         player.scale.setTo(1.5);
+        player.anchor.setTo(.5,.5);
+
+
         
         game.physics.enable(player,Phaser.Physics.ARCADE);
         player.body.collideWorldBounds = true;
+        
+        player.health = 5;
         
             //Player Animations
             player.animations.add('idle', [0,1,2,3,4,5,6,7],20, true);
@@ -79,9 +83,12 @@ window.onload = function() {
         //Enemy Setup
         HeavyEnemy = game.add.sprite(game.world.centerX + 200, game.world.centerY + 50, "HeavyEnemy");
         HeavyEnemy.scale.setTo(2);
+        HeavyEnemy.anchor.setTo(.5,.5);
         
         game.physics.enable(HeavyEnemy, Phaser.Physics.ARCADE);
         HeavyEnemy.body.collideWorldBounds = true;
+        
+        HeavyEnemy.health = 10;
         
         //Enemy Animations
             HeavyEnemy.animations.add('idle', [0,1,2,3,4,5],20, true);
@@ -92,6 +99,11 @@ window.onload = function() {
             HeavyEnemy.animations.add('hurt',[33,34,35,35,35],15,false)
             HeavyEnemy.animations.add('death', [36,37,38,38,38,38,38], 10, false);
         
+        //DEBUG - COLLISION BOUNDS
+        
+        
+        
+        
         
        
     }
@@ -99,21 +111,157 @@ window.onload = function() {
     function update() {
         
         //Player Movement
-        
+        playerControl();
         
         
     }
+    
+    function render(){
+        game.debug.text("Thor's Health: " + player.health, 32, 32);
+        game.debug.text("Thrym's Health: " + HeavyEnemy.health, game.width - 200, 32);
+
+        
+    }
+    
     
     
     //PLAYER FUNCTIONS
     //The player's overall controls will be handled by the playerControl function, which will call all the other player functions at the appropriate times.
     
-    function playerControl(){}
+    function playerControl(){
+        playerRun();
+        
+        if(attackButton.isDown){
+            playerCombo1();
+        }
+        
+        
+    }
     
     
-    function playerRun(){}
+    function playerRun(){
+        
+        var PLAYERSPEED = 85;
+        
+        player.body.velocity.x = 0;
+        player.body.velocity.y = 0;
+        
+        //Code borrowed from StarStruck example.
+        if (cursors.left.isDown)
+        {
+        player.body.velocity.x = -1*PLAYERSPEED;
+
+
+            if (playerFacing != 'left')
+                {
+                playerFacing = 'left';
+                player.scale.x = -1.5;
+                player.animations.play('run');
+
+                }
+            
+            if (cursors.up.isDown){
+            
+                player.body.velocity.y = -1*PLAYERSPEED;
+            
+            }
+        
+            else if(cursors.down.isDown){
+            
+                player.body.velocity.y = PLAYERSPEED;
+            
+            }
+        }
+        else if (cursors.right.isDown)
+        {
+        player.body.velocity.x = PLAYERSPEED;
+
+            if (playerFacing != 'right')
+            {
+                playerFacing = 'right';
+                player.scale.x = 1.5;
+                player.animations.play('run');
+
+            }
+            
+            if (cursors.up.isDown){
+            
+                player.body.velocity.y = -1*PLAYERSPEED;
+            
+            }
+        
+            else if(cursors.down.isDown){
+            
+                player.body.velocity.y = PLAYERSPEED;
+            
+            }
+        }
+        
+        
+        else if (cursors.up.isDown){
+            
+            player.body.velocity.y = -1*PLAYERSPEED;
+            player.animations.play('run');
+            
+        }
+        
+        else if(cursors.down.isDown){
+            
+            player.body.velocity.y = PLAYERSPEED;
+            player.animations.play('run');
+
+        }
+        
+    else
+    {
+        if (playerFacing != 'idle')
+        {
+            player.animations.stop();
+
+            player.animations.play('idle');
+            
+            
+
+            playerFacing = 'idle';
+        }
+    }
+        
+    }
+        
+        
     
-    function playerCombo1(){}
+    
+    function playerCombo1(){
+            player.body.velocity.x = 0;
+            player.body.velocity.y = 0;
+        
+            var playerToEnemyDistanceX = game.math.distance(player.body.position.x, 0, HeavyEnemy.body.position.x, 0);
+        
+            var playerToEnemyDistanceY = game.math.distance(0, player.body.position.y, 0, HeavyEnemy.body.position.y);
+            
+            player.animations.play('combo1');
+        
+        
+            if( (playerFacing == 'right' &&
+                 
+                playerToEnemyDistanceX <= 20 &&
+                playerToEnemyDistanceY <= 50) ||
+               
+                (playerFacing == 'left' &&
+                
+                playerToEnemyDistanceX >= -20 &&
+                playerToEnemyDistanceY >= -50)
+                
+              
+              ){
+                
+                enemyHurt();
+            }
+                
+            
+        
+        
+    }
     
     function playerCombo2(){}
 
@@ -136,6 +284,12 @@ window.onload = function() {
     function enemyCombo1(){}
     
     function enemyCombo2(){}
+        
+    function enemyHurt(){
+        HeavyEnemy.damage(1);
+        HeavyEnemy.animations.play('hurt');
+        
+    }
     
     function enemyDie(){}
     
