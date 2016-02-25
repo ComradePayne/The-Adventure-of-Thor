@@ -20,6 +20,8 @@ window.onload = function() {
         game.load.image( 'Background', 'assets/sprites/DA3ThrymsHall.png' );
         game.load.spritesheet('Thor', 'assets/sprites/ThorSprite.png', 90, 90);
         game.load.spritesheet('HeavyEnemy', 'assets/sprites/HeavyEnemySprite.png', 110, 110);
+        
+        game.load.audio('music1','assets/music/Truth of the Legend.mp3');
     }
     
     var player; //Thor
@@ -38,7 +40,13 @@ window.onload = function() {
     //Buttons!
     var cursors;    //To move.
     var attackButton;   //To strike.
-    var rollButton;     //To roll.
+    var rollButton; 
+    var pauseKey;       //To roll.
+    
+    
+    //Has game just started?
+    var gameJustStarted = true;
+    var instructions; //Text, global so it can be deleted.
     
     
     function create() {
@@ -57,7 +65,7 @@ window.onload = function() {
 
         
         //Player Setup
-        player = game.add.sprite(game.world.centerX - 250, game.world.centerY + 100, "Thor");
+        player = game.add.sprite(game.world.centerX - 250, game.world.centerY + 150, "Thor");
         player.scale.setTo(1.5);
         player.anchor.setTo(.5,.5);
 
@@ -81,7 +89,7 @@ window.onload = function() {
         
         
         //Enemy Setup
-        HeavyEnemy = game.add.sprite(game.world.centerX + 200, game.world.centerY + 50, "HeavyEnemy");
+        HeavyEnemy = game.add.sprite(game.world.centerX + 200, game.world.centerY + 150, "HeavyEnemy");
         HeavyEnemy.scale.setTo(2);
         HeavyEnemy.anchor.setTo(.5,.5);
         
@@ -102,13 +110,28 @@ window.onload = function() {
         //DEBUG - COLLISION BOUNDS
         
         
+        //PAUSE MENU - From Pause Menu example
+        
+        pauseKey = this.input.keyboard.addKey(Phaser.Keyboard.P);
+        pauseKey.onDown.add(togglePause, this);
+        
+        //MUSIC
+        
+        music = game.add.audio('music1');
+        
+        //Play music!
+        music.play();
         
         
+        //Print the instructions on the board.
+        instructions = game.add.text(game.width/2 - 350, game.height-450, 'Instructions:\n Hark! Heed these words well, that ye may survive the battle! \n Use the arrow keys to move Thor and the \'X\' key to strike with Mjollnir, your mighty hammer! \nNow, press the \'X\' button to begin thy rampage!\n \n Oh, and pay no attention to the terribly janky animations.\n Or the lack of any real gameplay. \n Oh, and you\'re supposed to hit Thrym over there until he dies.', { font: '18px Arial', fill: '#fff' });
         
+        togglePause();
        
     }
     
     function update() {
+        
         
         //Player Movement
         playerControl();
@@ -241,7 +264,7 @@ window.onload = function() {
             
             player.animations.play('combo1');
         
-        
+            //This code is horrendously buggy!
             if( (playerFacing == 'right' &&
                  
                 playerToEnemyDistanceX <= 20 &&
@@ -292,6 +315,21 @@ window.onload = function() {
     }
     
     function enemyDie(){}
+    
+    
+
+        
+         
+        
+        
+
+    
+    function togglePause() {
+
+    game.physics.arcade.isPaused = (game.physics.arcade.isPaused) ? false : true;
+    instructions.visible = (instructions.visible) ? false: true;
+
+}
     
     
     
