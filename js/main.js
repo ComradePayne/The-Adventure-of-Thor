@@ -17,13 +17,62 @@ window.onload = function() {
     
     function preload() {
         // Load an image and call it 'logo'.
-        game.load.image( 'background', 'assets/sprites/DA3ThrymsHall.png' );
+        game.load.image( 'Background', 'assets/sprites/DA3ThrymsHall.png' );
+        game.load.spritesheet('Thor', 'assets/sprites/ThorSprite.png', 90, 90);
+        game.load.spritesheet('HeavyEnemy', 'assets/sprites/HeavyEnemySprite.png', 110, 110);
     }
+    
+    var player; //Thor
+        var playerFacing = 'right'; // Which way is Thor facing (Left or right)
+        
+    var HeavyEnemy;//The dude you need to fight.
+        var enemyFacing = 'left'; // Which way is Thrym facing?
+    
+    var background; //Thrym's Hall
+    
+    //Sound
+    var music;  //Suitably epic music.
+    var hammerHitSound; //A whack!
+    
+    //Buttons!
+    var cursors;    //To move.
+    var attackButton;   //To strike.
+    var rollButton;     //To roll.
     
     
     function create() {
         
-        game.add.sprite(0,0,'background');
+        //Physics setup
+        game.physics.startSystem(Phaser.Physics.ARCADE);
+        
+        //Controls setup
+        cursors = game.input.keyboard.createCursorKeys();
+        attackButton = game.input.keyboard.addKey(Phaser.Keyboard.X);
+        rollButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+        
+        //Background setup
+        
+        background = game.add.sprite(0,0,'Background');
+        HeavyEnemy = game.add.sprite(game.world.centerX + 200, game.world.centerY + 50, "HeavyEnemy");
+        
+        //Player Setup
+        player = game.add.sprite(game.world.centerX - 250, game.world.centerY + 50, "Thor");
+        player.scale.setTo(1.5);
+        
+        game.physics.enable(player,Phaser.Physics.ARCADE);
+        player.body.collideWorldBounds = true;
+        
+            //Player Animations
+            player.animations.add('idle', [0,1,2,3,4,5,6,7],6, true);
+        
+        
+        
+        
+        HeavyEnemy.scale.setTo(2);
+        
+        
+        
+        
        
     }
     
